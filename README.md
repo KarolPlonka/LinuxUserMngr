@@ -11,8 +11,7 @@ Light GUI app to manage users in linux systems.
 - Deleting users.
 - Adding new users.
 - Creating new groups (if not existing while adding a new user).
-- Error handling while adding and deleting users and groups.
-- Refreshing data from system.
+- Error handling for adding and deleting users and groups.
 - Keyboard macros.
 
 <br>
