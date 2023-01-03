@@ -1,7 +1,9 @@
 # LinuxUserMngr
-Light GUI app to handle users in linux systems. 
+Light GUI app to manage users in linux systems. 
 
 ![Alt text](showcase.png)
+
+<br>
 
 ## Features:
 - Synchronization with system data.
@@ -12,5 +14,24 @@ Light GUI app to handle users in linux systems.
 - Error handling while adding and deleting users and groups.
 - Refreshing data from system.
 - Keyboard macros.
+
+<br>
+
+## Keyboard macros
+
+
+### Preview page:
+| Macro | Description |
+| ----------- | ----------- |
+| `Left Arrow` | Previous user |
+| `Right Arrow` | Next user |
+| `Delete` | Delete user |
+| `F5` | Refresh data |
+
+### Add page:
+| Macro | Description |
+|  ----------- | ----------- |
+| `Enter` | Add user |
+| `Delete` | Clear inputs |
 
 
