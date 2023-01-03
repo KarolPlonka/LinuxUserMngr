@@ -27,7 +27,6 @@ GtkWidget *ButtonRfr;
 
 //Labels
 GtkWidget *LabelUsername;
-GtkWidget *LabelPassword;
 GtkWidget *LabelUserID;
 GtkWidget *LabelGroups;
 GtkWidget *LabelUserInfo;
@@ -50,11 +49,10 @@ GtkWidget *EntryPassword;
 
 
 typedef struct node {
-  char* username; //1
-  bool password; //2
-  int userID;     //3
-  char* userInfo;    //5
-  char* directory;    //6
+  char* username;  //1
+  int userID;      //3
+  char* userInfo;  //5
+  char* directory; //6
 
   char* groups;
 
@@ -111,7 +109,6 @@ void next_field(char* buffer, char** line_ptr, char sep){
   }
   buffer[i] = '\0';
   (*line_ptr)++;
-  //printf("buff: %s \n", buffer);
 }
 
 
@@ -132,8 +129,6 @@ void assign_user_group(user* u){
   if(output != NULL && fgets(line , 510, output) != NULL){
     line[strcspn(line, "\n")] = 0;
     strcpy(u->groups, line + strlen(u->username) + 3);
-    //line[strcspn(line, "\n")] = 0;
-    //strcpy(u->groups, replace_char(line + strlen(u->username) + 3, ' ', ','));
   }
   else{
     u->groups = "";
@@ -158,7 +153,6 @@ void set_user_password_info(user* u){
   buffer[strcspn(buffer, "\n")] = 0;
   u->LastPasswordChange = (char*) malloc((strlen(buffer) + 1) * sizeof(char));
   strcpy(u->LastPasswordChange, buffer);
-  //printf("%s",u->LastPasswordChange);
 
   //last password change
   fgets(line, 1275, output);
@@ -196,14 +190,10 @@ user* fill_user_data(char* line_ptr){
   //username
   next_field(buffer, &line_ptr, sep);
   new_user->username = (char*) malloc((strlen(buffer) + 1) * sizeof(char));
-  //new_user->username = (char*) malloc(strlen(buffer) * sizeof(char));
   strcpy(new_user->username, buffer);
 
-
-  //password
+  //skip password
   next_field(buffer, &line_ptr, sep);
-  if(*buffer == 'x' && *(buffer+1) == '\0') { new_user->password = true; }
-  else                                      { new_user->password = false; }
 
   //userID
   next_field(buffer, &line_ptr, sep);
@@ -215,13 +205,11 @@ user* fill_user_data(char* line_ptr){
   //userInfo
   next_field(buffer, &line_ptr, sep);
   new_user->userInfo = (char*) malloc((strlen(buffer) + 1) * sizeof(char));
-  //new_user->userInfo = (char*) malloc(strlen(buffer) * sizeof(char));
   strcpy(new_user->userInfo, buffer);
 
   //directory
   next_field(buffer, &line_ptr, sep);
   new_user->directory = (char*) malloc((strlen(buffer) + 1) * sizeof(char));
-  //new_user->directory = (char*) malloc(strlen(buffer) * sizeof(char));
   strcpy(new_user->directory, buffer);
 
   //add groups
@@ -284,9 +272,8 @@ void print_users(user* u){
   user* cur_user = u;
   
   do{
-    printf("%s:%d:%d:%s:%s:%s:%s:%s:%s:%s\n",
+    printf("%s:%d:%s:%s:%s:%s:%s:%s:%s\n",
       cur_user->username,
-      cur_user->password,
       cur_user->userID,
       cur_user->userInfo,
       cur_user->directory,
@@ -399,12 +386,6 @@ int add_user_system(){
       return 0;
     }
   }
-
-  
-  //char* spaceless_groups;
-  //strcpy(spaceless_groups, groups);
-  //strcpy(spaceless_groups, replace_char(spaceless_groups, ' ', ''));
-  //printf("g: %s ", spaceless_groups);
   
 
   int offset = 0;
@@ -472,9 +453,6 @@ void display_current_user(){
   gtk_label_set_text(GTK_LABEL(LabelPasswordExpires    ),                       current_user->PasswordExpires    );
   gtk_label_set_text(GTK_LABEL(LabelPasswordInactive   ),                       current_user->PasswordInactive   );
   gtk_label_set_text(GTK_LABEL(LabelAccountExpires     ),                       current_user->AccountExpires     );
-
-  if(current_user->password){ gtk_label_set_text(GTK_LABEL(LabelPassword ), "yes" );}
-  else{                       gtk_label_set_text(GTK_LABEL(LabelPassword ), "no"  );}
 }
 
 void clear_output_labels(){
@@ -640,7 +618,6 @@ int main (int argc, char **argv) {
 
   //labels
   LabelUsername           = GTK_WIDGET(gtk_builder_get_object(builder, "LabelUsername"           ));
-  LabelPassword           = GTK_WIDGET(gtk_builder_get_object(builder, "LabelPassword"           ));
   LabelUserID             = GTK_WIDGET(gtk_builder_get_object(builder, "LabelUserID"             ));
   LabelGroups             = GTK_WIDGET(gtk_builder_get_object(builder, "LabelGroups"             ));
   LabelUserInfo           = GTK_WIDGET(gtk_builder_get_object(builder, "LabelUserInfo"           ));
