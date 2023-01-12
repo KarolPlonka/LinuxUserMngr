@@ -8,7 +8,7 @@
 #define NO_MEMORY 0
 #define PASSWD_LOADING_ERROR 0
 #define GDK_KEY_EnterLeft 65293
-#define GDK_KEY_EnterRight 65451
+#define GDK_KEY_EnterRight 65421
 
 GtkBuilder *builder;
 
@@ -24,6 +24,7 @@ GtkWidget *ButtonAdd;
 GtkWidget *ButtonDlt;
 GtkWidget *ButtonClr;
 GtkWidget *ButtonRfr;
+GtkWidget *ButtonSrc;
 
 //Labels
 GtkWidget *LabelUsername;
@@ -46,6 +47,7 @@ GtkWidget *EntryGroups;
 GtkWidget *EntryUserInfo;
 GtkWidget *EntryDirectory;
 GtkWidget *EntryPassword;
+GtkWidget *EntrySearchUser;
 
 
 typedef struct node {
@@ -112,7 +114,7 @@ void next_field(char* buffer, char** line_ptr, char sep){
 }
 
 
-//app data structer methods
+//app data structure methods
 void assign_user_group(user* u){
   char command[255];
   sprintf(command, "groups %s", u->username);
@@ -260,31 +262,31 @@ void get_users_from_passwd(user** users){
 
 void assign_all_users_groups(){
   user* start = root_user;
-  user* cur_user = current_user;
+  user* user_iter = current_user;
   do{
-    assign_user_group(cur_user);
-    cur_user = cur_user->next;
-  }while(cur_user != start);
+    assign_user_group(user_iter);
+    user_iter = user_iter->next;
+  }while(user_iter != start);
 }
 
 void print_users(user* u){
   user* start = u;
-  user* cur_user = u;
+  user* user_iter = u;
   
   do{
     printf("%s:%d:%s:%s:%s:%s:%s:%s:%s\n",
-      cur_user->username,
-      cur_user->userID,
-      cur_user->userInfo,
-      cur_user->directory,
-      cur_user->groups,
-      cur_user->LastPasswordChange,
-      cur_user->PasswordExpires,
-      cur_user->PasswordInactive,
-      cur_user->AccountExpires
+      user_iter->username,
+      user_iter->userID,
+      user_iter->userInfo,
+      user_iter->directory,
+      user_iter->groups,
+      user_iter->LastPasswordChange,
+      user_iter->PasswordExpires,
+      user_iter->PasswordInactive,
+      user_iter->AccountExpires
     );
-    cur_user = cur_user->next;
-  }while(cur_user != start);
+    user_iter = user_iter->next;
+  }while(user_iter != start);
 
 }
 
@@ -443,16 +445,16 @@ int delete_user_system(){
 
 
 //app actions
-void display_current_user(){
-  gtk_label_set_text(GTK_LABEL(LabelUsername           ),                       current_user->username           );
-  gtk_label_set_text(GTK_LABEL(LabelUserID             ), g_strdup_printf("%d", current_user->userID            ));
-  gtk_label_set_text(GTK_LABEL(LabelGroups             ),                       current_user->groups             );
-  gtk_label_set_text(GTK_LABEL(LabelUserInfo           ),                       current_user->userInfo           );
-  gtk_label_set_text(GTK_LABEL(LabelDirectory          ),                       current_user->directory          );
-  gtk_label_set_text(GTK_LABEL(LabelLastPasswordChange ),                       current_user->LastPasswordChange );
-  gtk_label_set_text(GTK_LABEL(LabelPasswordExpires    ),                       current_user->PasswordExpires    );
-  gtk_label_set_text(GTK_LABEL(LabelPasswordInactive   ),                       current_user->PasswordInactive   );
-  gtk_label_set_text(GTK_LABEL(LabelAccountExpires     ),                       current_user->AccountExpires     );
+void display_user(user* u){
+  gtk_label_set_text(GTK_LABEL(LabelUsername           ),                       u->username           );
+  gtk_label_set_text(GTK_LABEL(LabelUserID             ), g_strdup_printf("%d", u->userID            ));
+  gtk_label_set_text(GTK_LABEL(LabelGroups             ),                       u->groups             );
+  gtk_label_set_text(GTK_LABEL(LabelUserInfo           ),                       u->userInfo           );
+  gtk_label_set_text(GTK_LABEL(LabelDirectory          ),                       u->directory          );
+  gtk_label_set_text(GTK_LABEL(LabelLastPasswordChange ),                       u->LastPasswordChange );
+  gtk_label_set_text(GTK_LABEL(LabelPasswordExpires    ),                       u->PasswordExpires    );
+  gtk_label_set_text(GTK_LABEL(LabelPasswordInactive   ),                       u->PasswordInactive   );
+  gtk_label_set_text(GTK_LABEL(LabelAccountExpires     ),                       u->AccountExpires     );
 }
 
 void clear_output_labels(){
@@ -479,7 +481,7 @@ void delete_user(){
     if(delete_user_system()){
       delete_user_app();
       current_user = current_user->next;
-      display_current_user();
+      display_user(current_user);
     }
   }
 
@@ -490,35 +492,59 @@ void add_user(){
   if(add_user_system()){
     add_user_app();
     current_user = root_user->previous;
-    display_current_user();
+    display_user(current_user);
   }
 }
 
 void clear_input_labels(){
   gtk_entry_set_text (GTK_ENTRY(EntryUsername ), "");
   gtk_entry_set_text (GTK_ENTRY(EntryUserID   ), "");
-  gtk_entry_set_text (GTK_ENTRY(EntryGroups    ), "");
+  gtk_entry_set_text (GTK_ENTRY(EntryGroups   ), "");
   gtk_entry_set_text (GTK_ENTRY(EntryUserInfo ), "");
   gtk_entry_set_text (GTK_ENTRY(EntryDirectory), "");
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(EntryPassword), FALSE);
+  
+  gtk_entry_set_text (GTK_ENTRY(EntrySearchUser), "");
 }
 
+void search_for_user(){
+  const char* username_toFind = gtk_entry_get_text(GTK_ENTRY(EntrySearchUser));
+  //if empty string was submited
+  if(*username_toFind == '\0'){return;}
+
+  user* user_iter = root_user;
+
+  do{
+    if(strcmp(user_iter->username, username_toFind) == 0){
+      //user found
+      current_user = user_iter;
+      display_user(current_user);
+      return;
+    }
+    user_iter = user_iter->next;
+  }while(user_iter != root_user);
+
+  //user not found
+  gtk_label_set_markup(GTK_LABEL(LabelDeleteOutcome), "<span color='red'>User not found</span>");
+
+}
 
 //event triggers
 void on_ButtonPrv_clicked (GtkButton *b){
   current_user = current_user->previous;
-  display_current_user();
+  display_user(current_user);
   clear_output_labels();
 }
 
 void on_ButtonNxt_clicked (GtkButton *b){
   current_user = current_user->next;
-  display_current_user();
+  display_user(current_user);
   clear_output_labels();
 }
 
 void on_ButtonDlt_clicked (GtkButton *b){
   clear_output_labels();
+  clear_input_labels();
   delete_user();
 }
 
@@ -529,8 +555,9 @@ void on_ButtonClr_clicked (GtkButton *b){
 
 void on_ButtonRfr_clicked (GtkButton *b){
   get_users_from_passwd(&current_user);
-  display_current_user();
+  display_user(current_user);
   clear_output_labels();
+  clear_input_labels();
 }
 
 void on_stack_page_changed (GtkStackSwitcher *s){
@@ -546,6 +573,11 @@ void on_ButtonAdd_clicked (GtkButton *b){
   add_user();
 }
 
+void on_ButtonSrc_clicked (GtkButton *b){
+  clear_output_labels();
+  search_for_user();
+}
+
 bool on_Window_key_press_event(GtkWidget *widget, GdkEventKey *event){
   clear_output_labels();
 
@@ -555,18 +587,24 @@ bool on_Window_key_press_event(GtkWidget *widget, GdkEventKey *event){
     {
       case GDK_KEY_Left:
         current_user = current_user->previous;
-        display_current_user();
+        display_user(current_user);
         return true;
       case GDK_KEY_Right:
         current_user = current_user->next;
-        display_current_user();
+        display_user(current_user);
         return true;
       case GDK_KEY_Delete:
         delete_user();
         return true;
       case GDK_KEY_F5:
         get_users_from_passwd(&current_user);
-        display_current_user();
+        display_user(current_user);
+        return true;
+      case GDK_KEY_EnterRight:
+        search_for_user();
+        return true;
+      case GDK_KEY_EnterLeft:
+        search_for_user();
         return true;
     }
   }
@@ -615,6 +653,7 @@ int main (int argc, char **argv) {
   ButtonDlt = GTK_WIDGET(gtk_builder_get_object(builder, "ButtonDlt"));
   ButtonClr = GTK_WIDGET(gtk_builder_get_object(builder, "ButtonClr"));
   ButtonRfr = GTK_WIDGET(gtk_builder_get_object(builder, "ButtonRfr"));
+  ButtonRfr = GTK_WIDGET(gtk_builder_get_object(builder, "ButtonSrc"));
 
   //labels
   LabelUsername           = GTK_WIDGET(gtk_builder_get_object(builder, "LabelUsername"           ));
@@ -631,16 +670,17 @@ int main (int argc, char **argv) {
   
 
   //entries
-  EntryUsername  = GTK_WIDGET(gtk_builder_get_object(builder, "EntryUsername"  ));
-  EntryUsername  = GTK_WIDGET(gtk_builder_get_object(builder, "EntryUsername"  ));
-  EntryUserID    = GTK_WIDGET(gtk_builder_get_object(builder, "EntryUserID"    ));
-  EntryGroups    = GTK_WIDGET(gtk_builder_get_object(builder, "EntryGroups"     ));
-  EntryUserInfo  = GTK_WIDGET(gtk_builder_get_object(builder, "EntryUserInfo"  ));
-  EntryDirectory = GTK_WIDGET(gtk_builder_get_object(builder, "EntryDirectory" ));
-  EntryPassword  = GTK_WIDGET(gtk_builder_get_object(builder, "EntryPassword"  ));
+  EntryUsername   = GTK_WIDGET(gtk_builder_get_object(builder, "EntryUsername"   ));
+  EntryUsername   = GTK_WIDGET(gtk_builder_get_object(builder, "EntryUsername"   ));
+  EntryUserID     = GTK_WIDGET(gtk_builder_get_object(builder, "EntryUserID"     ));
+  EntryGroups     = GTK_WIDGET(gtk_builder_get_object(builder, "EntryGroups"     ));
+  EntryUserInfo   = GTK_WIDGET(gtk_builder_get_object(builder, "EntryUserInfo"   ));
+  EntryDirectory  = GTK_WIDGET(gtk_builder_get_object(builder, "EntryDirectory"  ));
+  EntryPassword   = GTK_WIDGET(gtk_builder_get_object(builder, "EntryPassword"   ));
+  EntrySearchUser = GTK_WIDGET(gtk_builder_get_object(builder, "EntrySearchUser" ));
 
   gtk_widget_show(Window);
-  display_current_user();
+  display_user(current_user);
   gtk_main();
 
   return EXIT_SUCCESS;
