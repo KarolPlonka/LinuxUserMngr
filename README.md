@@ -6,7 +6,7 @@ Light GUI app to manage users in linux systems.
 <br>
 
 ## Tested for:
- :white_check_mark: Ubuntu 22.04.01
+ :white_check_mark: **Ubuntu** 22.04.01
 
 <br>
 
