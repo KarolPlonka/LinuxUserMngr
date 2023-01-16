@@ -5,6 +5,11 @@ Light GUI app to manage users in linux systems.
 
 <br>
 
+## Tested for:
+ :white_check_mark: Ubuntu 22.04.01
+
+<br>
+
 ## Features:
 - Synchronization with system data.
 - Displaying information about users, user's groups, account expiration.
