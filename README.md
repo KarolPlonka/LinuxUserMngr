@@ -24,6 +24,7 @@ Light GUI app to manage users in linux systems.
 | ----------- | ----------- |
 | `Left Arrow` | Previous user |
 | `Right Arrow` | Next user |
+| `Enter` | Search |
 | `Delete` | Delete user |
 | `F5` | Refresh data |
 
