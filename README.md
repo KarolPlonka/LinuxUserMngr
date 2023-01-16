@@ -8,6 +8,7 @@ Light GUI app to manage users in linux systems.
 ## Features:
 - Synchronization with system data.
 - Displaying information about users, user's groups, account expiration.
+- Searching for user.
 - Deleting users.
 - Adding new users.
 - Creating new groups (if not existing while adding a new user).
