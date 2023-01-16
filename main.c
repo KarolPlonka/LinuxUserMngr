@@ -70,38 +70,6 @@ typedef struct node {
 user* current_user;
 user* root_user;
 
-/*
-char* combine_groups(char array[32][255]) {
-    char* combined;
-    
-    if((combined = malloc(32 * 255 * sizeof(char))) == NULL ) {
-      fprintf(stderr, "No memory available\n");
-      exit(NO_MEMORY);
-    }
-
-    int i = 0;
-
-    while(array[i+1][0] != '\0') {
-      strcat(combined, array[i++]);
-      strcat(combined, ", ");
-    }
-    strcat(combined, array[i++]);
-
-    return combined;
-}
-*/
-
-/*
-char* replace_char(char* str, char find, char replace){
-    char *current_pos = strchr(str,find);
-    while (current_pos) {
-        *current_pos = replace;
-        current_pos = strchr(current_pos,find);
-    }
-    return str;
-}
-*/
-
 //tokenizer
 void next_field(char* buffer, char** line_ptr, char sep){
   int i = 0;
@@ -354,20 +322,24 @@ int add_groups_system(const char* groups_const){
     
     //prepar command
     sprintf(groups_command, "groupadd %s 2>&1", buffer);
-    //printf("command: %s\n", groups_command);
     
     
     //execute command
     if(execute_command_get_error(groups_command, error_msg) == 0){
       //failed to add current group
       if(strcmp(error_msg + strlen(error_msg) - 14, "already exists") != 0){
+        
         //the error is not already exists error
-        //printf("e: %s\n", error_msg);
         sprintf(label_content, "<span color='red'>%s</span>", error_msg + 9);
         gtk_label_set_markup(GTK_LABEL(LabelAddOutcome), label_content);
         return 0;
       }
     }
+
+
+    sprintf(groups_command, "groupadd %s 2>&1", buffer);
+
+
   }while(*line_ptr != '\0' && *(line_ptr-1) != '\0');
 
   return 1;
@@ -392,11 +364,14 @@ int add_user_system(){
 
   int offset = 0;
   char command[510] = {0};
-  offset += snprintf(command + offset, 510 - offset, "useradd '%s' ", username);
+
+  //ADDUSER
+  offset += snprintf(command + offset, 510 - offset, "adduser '%s' -q --disabled-password", username);
   if(*userID)   {offset += snprintf(command + offset, 510 - offset, " -u '%s' ", userID   );}
-  if(*groups)   {offset += snprintf(command + offset, 510 - offset, " -G '%s' ", groups );}
-  if(*userInfo) {offset += snprintf(command + offset, 510 - offset, " -c '%s' ", userInfo );}
-  if(*directory){offset += snprintf(command + offset, 510 - offset, " -d '%s' ", directory);}
+  if(*userInfo) {offset += snprintf(command + offset, 510 - offset, " --gecos '%s' ", userInfo );}
+  else          {offset += snprintf(command + offset, 510 - offset, " --gecos '' ");}
+  if(*directory){offset += snprintf(command + offset, 510 - offset, " --home '%s' ", directory);}
+  
   offset += snprintf(command + offset, 510 - offset, " 2>&1 ");
 
   char error_msg[255];
@@ -410,6 +385,12 @@ int add_user_system(){
   else{
     //User added succefully
     gtk_label_set_markup(GTK_LABEL(LabelAddOutcome), "<span color='green'>User added succefully</span>");
+
+    //adduser to given groups
+    if(*groups){
+      sprintf(command, "usermod -a -G %s %s > /dev/null 2>&1", groups, username);
+      system(command);
+    }
 
     //delete default password
     sprintf(command, "passwd %s -d > /dev/null 2>&1", username);
