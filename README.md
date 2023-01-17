@@ -23,21 +23,20 @@ Light GUI app to manage users in linux systems.
 <br>
 
 ## Keyboard macros
+| Macro | Preview Page | Add Page |
+| ----------- | ----------- | ----------- |
+| `Enter` | Search | Add user |
+| `Delete` | Delete user | Clear inputs |
+| `Left Arrow` | Previous user | - |
+| `Right Arrow` | Next user | - |
+| `F5` | Refresh data | - |
 
+<br>
 
-### Preview page:
-| Macro | Description |
-| ----------- | ----------- |
-| `Left Arrow` | Previous user |
-| `Right Arrow` | Next user |
-| `Enter` | Search |
-| `Delete` | Delete user |
-| `F5` | Refresh data |
+## Used technologies:
+- C (programming language)
+- [GTK](https://www.gtk.org/)
+- [Glade](https://glade.gnome.org/)
 
-### Add page:
-| Macro | Description |
-|  ----------- | ----------- |
-| `Enter` | Add user |
-| `Delete` | Clear inputs |
 
 
